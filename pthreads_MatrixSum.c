@@ -111,5 +111,6 @@ int main(int argc , char *argv[])
         free(matrix[i]);
     }
     free(matrix);
+    printf("Main: program completed. Exiting.\n");
     return 0;
 }
