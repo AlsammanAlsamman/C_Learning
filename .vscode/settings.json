@@ -2,6 +2,7 @@
     "files.associations": {
         "*.rmd": "markdown",
         "*.Rmd": "rmd",
-        "algorithm": "c"
+        "algorithm": "c",
+        "stdio.h": "c"
     }
 }

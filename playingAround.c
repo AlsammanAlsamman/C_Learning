@@ -5,51 +5,19 @@
 // Disclaimer: The script comes with no warranty, use at your own risk                               #
 // This script is not intended for commercial use                                                    #
 //####################################################################################################
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include <time.h>
-
-void initMatrix(int **matrix, int rown, int coln)
+#include <unistd.h>
+void *routine(int *x)
 {
-    size_t i ;
-    size_t j;
-    for (i = 0; i < rown; i++)
-    {
-        for ( j = 0; j < coln; j++)
-        {
-            matrix[i][j] = rand() % 10;
-        }
-    }
+    *x = *x +1;
 }
-
-void printmatrix(int **matrix, int rown, int coln)
+int main(int argc, char **argv)
 {
-    size_t i ;
-    size_t j;
-    for (i = 0; i < rown; i++)
-    {
-        for ( j = 0; j < coln; j++)
-        {
-            printf("%d\t",matrix[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-int main (int argc, char **argv)
-{
-    srand(time(NULL));
-    // create a matrix
-    int rown = 10;
-    int coln = 10;
-    int **matrix = (int**) malloc(sizeof(int*) * rown);
-    size_t i ;
-    for (i = 0; i < rown; i++)
-    {
-        matrix[i] = (int *) malloc(sizeof(int) *coln);
-    }
-    initMatrix(matrix, rown,coln);
-    printmatrix(matrix,rown,coln);  
+    int x = 10;
+    routine(&x);
+    printf("%d",x);
     return 0;
 }
