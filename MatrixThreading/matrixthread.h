@@ -4,7 +4,7 @@
 
 // Matrix functions
 int **createMatrix();
-int **initializeMatrix(int **matrix);
+void initializeMatrix(int **matrix);
 void printMatrix(int **matrix);
 void freeMatrix(int **matrix);
 

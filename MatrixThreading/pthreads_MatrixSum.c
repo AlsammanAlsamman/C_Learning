@@ -11,13 +11,14 @@
 #include <unistd.h>
 #include <time.h>
 #include "matrixthread.h"
+#include <math.h>
 
-#define ROWN 10
+#define ROWN 15
 #define COLN 10
-#define MAX_THREADS 100
+#define MAX_THREADS 7
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
-int rowCounter = 0;
+
 
 
 
@@ -57,11 +58,10 @@ void printMatrix(int **matrix)
     
 }
 
-int **initializeMatrix(int **matrix)
+void initializeMatrix(int **matrix)
 {
     srand(time(NULL));
-    size_t i ;
-    size_t j;
+    size_t i, j;
     for (i = 0; i < ROWN; i++)
     {
         for ( j = 0; j < COLN; j++)
@@ -74,32 +74,9 @@ int **initializeMatrix(int **matrix)
 
 void * rowSumRoutine(void *arg)
 {
- int *currentRow = (int*) malloc(sizeof(int));
- 
- int *rowsum = (int*) malloc(sizeof(int));
- *rowsum = 0;
- int **matrix = (int **)arg;
+    int *rows = (int *) arg;
+    // print thread rows
 
- pthread_mutex_lock(&mutex);
- *currentRow = rowCounter;
- rowCounter++;
- pthread_mutex_unlock(&mutex);
- if(*currentRow < ROWN)
- {
-  size_t i;
-  for(i = 0; i < COLN; i++)
-  {
-   *rowsum += matrix[*currentRow][i];
-  }
-  printf("Row %d sum: %d\n", *currentRow, *rowsum);
- }
- else
- {
-  printf("No more rows to process\n");
-  exit(0);
- }
- free(rowsum);
- free(currentRow);
 }
 
 pthread_t *createThreads(int n)
@@ -113,35 +90,88 @@ void freeThreads(pthread_t *threads)
     free(threads);
 }
 
+int **ThreadsRows(int threadShare, int leftRows, int max_threads)
+{    
+    // create an array of rows for each thread
+    int **threadRows = (int **) malloc(sizeof(int *) * max_threads);
+    // for each thread
+    size_t i;
+    for (i = 0; i < max_threads; i++)
+    {
+        // create an array of rows
+        threadRows[i] = (int *) malloc(sizeof(int) * threadShare + 1); // +1 for the sentinel
+        // for each row
+        size_t j;
+        for (j = 0; j < threadShare; j++)
+        {
+            // add the row to the thread
+            threadRows[i][j] = i * threadShare + j;
+        }
+        // add a sentinel
+        threadRows[i][threadShare] = -1;
+    }
+    // add the left rows to the last thread
+    if (leftRows > 0)
+    {
+        // reallocate the last thread
+        int lastThreadNewSize = threadShare + leftRows + 1; // +1 for the sentinel
+        threadRows[max_threads - 1] = (int *) realloc(threadRows[max_threads - 1], sizeof(int) * lastThreadNewSize);
+        // add the left rows to the last thread
+        size_t j;
+        for (j = 0; j < leftRows; j++)
+        {
+            threadRows[max_threads - 1][j + threadShare] = max_threads * threadShare + j;
+        }
+        // add a sentinel
+        threadRows[max_threads - 1][lastThreadNewSize - 1] = -1;
+    }
+    return threadRows;
+}
+void printThreadsRows(int **threadRows,  int threadShare, int leftRows,int max_threads)
+{
+
+    // print threads rows
+    size_t i;
+    for (i = 0; i < max_threads; i++)
+    {
+        while (threadRows[i][0] != -1)
+        {
+            printf("%d\t", threadRows[i][0]);
+            threadRows[i]++;
+        }
+        printf("\n");
+    }
+}
 
 int main(int argc, char **argv)
 {
     // create the matrix
     int **matrix = createMatrix();
     initializeMatrix(matrix);
-    printf("rowCounter: %d\n", rowCounter);
-    // // while there are rows to process
-    // while (rowCounter >= 0)
-    // {
-    //     // create threads
-    //     pthread_t *threads = createThreads(MAX_THREADS);
-    //     // for each thread
-    //     size_t i;
-    //     for (i = 0; i < MAX_THREADS; i++)
-    //     {
-    //         // create a thread
-    //         pthread_create(&threads[i], NULL, rowSumRoutine, (void *)matrix);
-    //     }
-    //     // for each thread
-    //     for (i = 0; i < MAX_THREADS; i++)
-    //     {
-    //         // wait for the thread to finish
-    //         pthread_join(threads[i], NULL);
-    //     }
-    //     // free the threads
-    //     freeThreads(threads);
-    // }
+    
+    // calculate the number of threads
+    int max_threads = MAX_THREADS;
+    // if th threads number is bigger than the rows number then use the rows number
+    if(ROWN < max_threads)
+    {
+        max_threads = ROWN;
+    }
+    
+    // Calculate the number of thread share
+    int threadShare = 1;
+    while (ROWN / threadShare > max_threads)
+    {
+        threadShare++;
+    }
+    printf("bestThreadShare: %d\n", threadShare);
+    int leftRows = ROWN - (threadShare * max_threads); 
+    printf("leftRows: %d\n", leftRows);
+    
+    int **threadRows = ThreadsRows(threadShare, leftRows, max_threads);
+    printThreadsRows(threadRows, threadShare, leftRows, max_threads);
+    // create the threads
+    pthread_t *threads = createThreads(max_threads);
 
-    freeMatrix(matrix);
+    // freeMatrix(matrix);
     return 0;
 }
