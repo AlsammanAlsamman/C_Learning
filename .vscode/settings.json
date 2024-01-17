@@ -3,6 +3,7 @@
         "*.rmd": "markdown",
         "*.Rmd": "rmd",
         "algorithm": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "distancefunctions.h": "c"
     }
 }

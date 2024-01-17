@@ -6,10 +6,12 @@
 // This script is not intended for commercial use                                                    #
 //####################################################################################################
 
-// About calculating distance matrix for a set of individuals
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <string.h>
+
+double euclideanDistance(double* , double* , int );
+void calculateAlleleFrequencies(int* , int , double*);
