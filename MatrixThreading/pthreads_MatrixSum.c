@@ -6,26 +6,9 @@
 // This script is not intended for commercial use                                                    #
 //####################################################################################################
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
 #include "matrixthread.h"
-#include <math.h>
-
-#define ROWN 15
-#define COLN 10
-#define MAX_THREADS 7
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
-
-
-typedef struct ThreadArgs
-{
-    int **matrix;
-    int *rows;
-} ThreadArgs;
-
 
 int **createMatrix()
 {
@@ -109,10 +92,7 @@ pthread_t *createThreads(int n)
     pthread_t *threads = (pthread_t *) malloc(sizeof(pthread_t) * n);
     return threads;
 }
-void freeThreads(pthread_t *threads)
-{
-    free(threads);
-}
+
 int **ThreadsRows(int max_threads)
 {    
     // start with minimum row number per thread
@@ -194,7 +174,7 @@ int main(int argc, char **argv)
     // create the matrix
     int **matrix = createMatrix();
     initializeMatrix(matrix);
-
+    // calculate the number of threads
     int *threadnumber = fittedThreadNumber();
     printf("%d\n",*threadnumber);
     int **threadRows = ThreadsRows(*threadnumber);
@@ -222,5 +202,7 @@ int main(int argc, char **argv)
         pthread_join(threads[i], NULL);
     }
     freeMatrix(matrix);
+    // free the threads arguments
+    free(args); // only the array because the threads arguments are freed in the threads
     return 0;
 }
