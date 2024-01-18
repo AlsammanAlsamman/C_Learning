@@ -8,6 +8,24 @@
 
 #include "DistanceFunctions.h"
 
+// Function to calculate allele frequencies
+// input: individual data (genotype), number of markers
+// output: allele frequencies of 3 alleles states (0, 1, 2)
+void calculateAlleleFrequencies(int* individual, int numMarkers, double* frequencies) {
+    // Initialize frequency counts to 0
+    int count[3] = {0}; // 0, 1, 2 alleles
+    size_t i;
+    // Count occurrences of each allele
+    for (i = 0; i < numMarkers; ++i) {
+        count[individual[i]]++;
+        // because you have 3 alleles (0, 1, 2) and you want to count the number of each allele
+    }
+    // Calculate frequencies
+    for (i = 0; i < 3; ++i) {
+        frequencies[i] = (double)count[i] / numMarkers;
+    }
+}
+
 // Function to calculate Euclidean distance between two individuals
 double euclideanDistance(double* alleleFrequenciesX, double* alleleFrequenciesY, int numMarkers) {
     double distance = 0.0;
@@ -18,22 +36,6 @@ double euclideanDistance(double* alleleFrequenciesX, double* alleleFrequenciesY,
     }
     return sqrt(distance);
 }
-// Function to calculate allele frequencies
-void calculateAlleleFrequencies(int* individual, int numMarkers, double* frequencies) {
-    // Initialize frequency counts
-    int count[3] = {0}; // 0, 1, 2 alleles
-
-    // Count occurrences of each allele
-    for (int i = 0; i < numMarkers; ++i) {
-        count[individual[i]]++;
-    }
-
-    // Calculate frequencies
-    for (int i = 0; i < 3; ++i) {
-        frequencies[i] = (double)count[i] / numMarkers;
-    }
-}
-
 
 // double euclideanDistance(int* alleleFrequenciesX, int* alleleFrequenciesY, int numMarkers)
 void calculateMarkerFreqForMatrix(int matrix[][MARKERS], int numSamples, int numMarkers, double **markerFrequencies)
@@ -55,6 +57,7 @@ void printMarkerFreqForMatrix(double **markerFrequencies, int numSamples, int nu
         printf("Allele frequencies of the %dth individual: %f, %f, %f\n", i, markerFrequencies[i][0], markerFrequencies[i][1], markerFrequencies[i][2]);
     }
 }
+
 // Function to calculate distance matrix
 void calculateDistanceMatrix(double **markerFrequencies, int numSamples, int numMarkers, double **distanceMatrix, int completeMatrix)
 {
