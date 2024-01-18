@@ -12,6 +12,14 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <string.h>
-
+#define MARKERS 8
+#define SAMPLES 10
 double euclideanDistance(double* , double* , int );
 void calculateAlleleFrequencies(int* , int , double*);
+// double euclideanDistance(int* alleleFrequenciesX, int* alleleFrequenciesY, int numMarkers)
+void calculateMarkerFreqForMatrix(int  [][MARKERS], int , int , double **);
+// Function to print allele frequencies for a matrix
+void printMarkerFreqForMatrix(double **, int , int );
+// Function to calculate distance matrix
+void calculateDistanceMatrix(double **, int, int , double **, int);
+void createRandomMatrix(int [][MARKERS], int, int);
