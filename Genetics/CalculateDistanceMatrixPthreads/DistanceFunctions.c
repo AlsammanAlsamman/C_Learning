@@ -290,8 +290,7 @@ void* calculateAlleleFrequencies_Threads(void *args) {
     // print target rows
     while(targetRows[0] != -1)
     {
-        // printf("%d ", targetRows[0]);
-        
+        printf("%d ", targetRows[0]);
         // calculate allele frequencies for the ith sample
         calculateAlleleFrequencies(matrix[targetRows[0]], MARKERS, markerFrequencies[targetRows[0]]);
         targetRows++;

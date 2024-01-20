@@ -14,7 +14,7 @@
 #include <string.h>
 #define MARKERS 50
 #define SAMPLES 50
-#define MAX_THREADS 4
+#define MAX_THREADS 5
 
 
 // genettic functions

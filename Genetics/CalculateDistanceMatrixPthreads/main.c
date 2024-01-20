@@ -6,12 +6,7 @@
 // This script is not intended for commercial use                                                    #
 //####################################################################################################
 
-// About calculating distance matrix for a set of individuals
-
 #include "DistanceFunctions.h"
-
-
-
 
 int main()
 {   
