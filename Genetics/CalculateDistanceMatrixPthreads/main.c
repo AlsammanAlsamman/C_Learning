@@ -10,48 +10,66 @@
 
 #include "DistanceFunctions.h"
 
+
+
+
 int main()
-{
+{   
+    // pthread_barrier_init(&barrier, NULL, MAX_THREADS);
+    // initialize random seed
     srand(time(NULL));
-    int matrix[SAMPLES][MARKERS];
-    createRandomMatrix(matrix, SAMPLES, MARKERS);
-    // create a pointer to the matrix of allele frequencies
+    // create random matrix
+    int **matrix = createRandomMatrix(SAMPLES, MARKERS);
+    // write matrix to file geno.txt
+    writeMatrix2File("geno.txt", matrix, SAMPLES, MARKERS);
+    // // create matrix
+    // int **matrix = (int **)malloc(SAMPLES * sizeof(int *));
+    // for (int i = 0; i < SAMPLES; ++i)
+    // {
+    //     matrix[i] = (int *)malloc(sizeof(int) * MARKERS);
+    //     memset(matrix[i], 0, sizeof(int) * MARKERS);
+    // }
+    
+    // // read matrix from file geno.txt
+    // readMatrixFromFile("geno.txt", matrix);
+    // // // print matrix    
+    // printMatrixInt(matrix, SAMPLES, MARKERS);
+    
+    // divide matrix into threads
+    int *fitNumber = fittedThreadNumber();
+    int **rows_per_threads = RowsPerThreads(*fitNumber, SAMPLES);
+    // printThreadsRows(rows_per_threads, *fitNumber);
+
+    // create matrix for frequencies
     double **markerFrequencies = (double **)malloc(SAMPLES * sizeof(double *));
     for (int i = 0; i < SAMPLES; ++i)
     {
         markerFrequencies[i] = (double *)malloc(sizeof(double) * 3);
         memset(markerFrequencies[i], 0, sizeof(double) * 3);
     }
-    // calculate allele frequencies for the matrix
-    calculateMarkerFreqForMatrix(matrix, SAMPLES, MARKERS, markerFrequencies);
-    // printMarkerFreqForMatrix(markerFrequencies, SAMPLES, MARKERS);
-    // create a pointer to the distance matrix
-    double **distanceMatrix = (double **)malloc(SAMPLES * sizeof(double *));
-    for (int i = 0; i < SAMPLES; ++i)
+    // printMatrixDouble(markerFrequencies, SAMPLES, 3);
+    // create threads
+    pthread_t *threads = createThreads(*fitNumber);
+    // create arguments for threads
+    thread_freq_args *args = (thread_freq_args *)malloc(sizeof(thread_freq_args) * *fitNumber);
+    for (int i = 0; i < *fitNumber; ++i)
     {
-        distanceMatrix[i] = (double *)malloc(sizeof(double) * SAMPLES);
-        memset(distanceMatrix[i], 0, sizeof(double) * SAMPLES);
+        args[i].individuals =  rows_per_threads[i];
+        args[i].matrix = matrix;
+        args[i].freqMatrix = markerFrequencies;
     }
-    // calculate distance matrix
-    calculateDistanceMatrix(markerFrequencies, SAMPLES, MARKERS, distanceMatrix, 0);
-
-    // print distance matrix
-    for (int i = 0; i < SAMPLES; ++i)
+    size_t i;
+    for (i = 0; i < *fitNumber; ++i)
     {
-        for (int j = 0; j < SAMPLES; ++j)
-        {
-            printf("%f ", distanceMatrix[i][j]);
-        }
-        printf("\n");
+     int *i_ptr = (int *)malloc(sizeof(int));
+         *i_ptr = i;
+    pthread_create(&threads[i], NULL, calculateAlleleFrequencies_Threads, &args[*i_ptr]);
     }
-    
-    // free memory
-    for (int i = 0; i < SAMPLES; ++i)
+    // wait for threads to finish
+    for (i = 0; i < *fitNumber; ++i)
     {
-        free(markerFrequencies[i]);
-        free(distanceMatrix[i]);
-    }
-    free(markerFrequencies);
-    free(distanceMatrix);
+        pthread_join(threads[i], NULL);
+    }   
+    printMatrixDouble(markerFrequencies, SAMPLES, 3);
     return 0;
 }

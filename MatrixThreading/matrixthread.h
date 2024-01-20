@@ -5,7 +5,7 @@
 #include <math.h>
 #include <pthread.h>
 
-#define ROWN 15
+#define ROWN 16
 #define COLN 10
 #define MAX_THREADS 7
 

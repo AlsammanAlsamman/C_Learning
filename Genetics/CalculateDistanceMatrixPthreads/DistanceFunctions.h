@@ -12,14 +12,39 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <string.h>
-#define MARKERS 8
-#define SAMPLES 10
-double euclideanDistance(double* , double* , int );
+#define MARKERS 50
+#define SAMPLES 50
+#define MAX_THREADS 4
+
+
+// genettic functions
+int **createRandomMatrix(int, int);
+
+
+// double euclideanDistance(double* , double* , int );
 void calculateAlleleFrequencies(int* , int , double*);
-// double euclideanDistance(int* alleleFrequenciesX, int* alleleFrequenciesY, int numMarkers)
-void calculateMarkerFreqForMatrix(int  [][MARKERS], int , int , double **);
+// // double euclideanDistance(int* alleleFrequenciesX, int* alleleFrequenciesY, int numMarkers)
+// void calculateMarkerFreqForMatrix(int  [][MARKERS], int , int , double **);
+// // Function to calculate distance matrix
+// void calculateDistanceMatrix(double **, int, int , double **, int);
+
+// print functions
 // Function to print allele frequencies for a matrix
-void printMarkerFreqForMatrix(double **, int , int );
-// Function to calculate distance matrix
-void calculateDistanceMatrix(double **, int, int , double **, int);
-void createRandomMatrix(int [][MARKERS], int, int);
+void printMatrixDouble(double **matrix, int xL , int yL);
+void printMatrixInt(int **, int xL , int yL);
+
+// // Functions for threads
+int **RowsPerThreads(int, int);
+void printThreadsRows(int **rows_per_threads, int max_threads);
+pthread_t *createThreads(int n);
+int *fittedThreadNumber();
+
+// Threads arguments
+typedef struct
+{
+  int *individuals;
+  int **matrix;
+  double **freqMatrix;
+} thread_freq_args;
+
+void* calculateAlleleFrequencies_Threads( void *args);
