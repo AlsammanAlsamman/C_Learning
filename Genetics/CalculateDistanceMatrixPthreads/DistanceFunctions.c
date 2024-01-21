@@ -157,7 +157,7 @@ void readMatrixFromFile(char *filename , int **matrix)
     fclose(fp);
 }
 
-void writeMatrix2File(char *filename , int **matrix, int xL , int yL)
+void writeMatrix2File(char *filename , int **matrix, int xL , int yL, char sep)
 {
     FILE *fp;
     fp = fopen(filename, "w");
@@ -173,6 +173,8 @@ void writeMatrix2File(char *filename , int **matrix, int xL , int yL)
         for ( j = 0; j < yL; j++)
         {
             fprintf(fp, "%d", matrix[i][j]);
+            if (j != yL - 1)
+                fprintf(fp, "%c", sep);
         }
         if (i != xL - 1)
             fprintf(fp, "\n");

@@ -48,3 +48,4 @@ typedef struct
 } thread_freq_args;
 
 void* calculateAlleleFrequencies_Threads( void *args);
+void writeMatrix2File(char *fileName, int **matrix, int xL, int yL, char sep);

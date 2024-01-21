@@ -16,7 +16,7 @@ int main()
     // create random matrix
     int **matrix = createRandomMatrix(SAMPLES, MARKERS);
     // write matrix to file geno.txt
-    writeMatrix2File("geno.txt", matrix, SAMPLES, MARKERS);
+    writeMatrix2File("geno.txt", matrix, SAMPLES, MARKERS, ' ');
     // // create matrix
     // int **matrix = (int **)malloc(SAMPLES * sizeof(int *));
     // for (int i = 0; i < SAMPLES; ++i)
@@ -65,6 +65,8 @@ int main()
     {
         pthread_join(threads[i], NULL);
     }   
+    // write matrix to file freq.txt
+    // writeMatrix2File("freq.txt", markerFrequencies, SAMPLES, 3, '\t');
     printMatrixDouble(markerFrequencies, SAMPLES, 3);
     return 0;
 }
