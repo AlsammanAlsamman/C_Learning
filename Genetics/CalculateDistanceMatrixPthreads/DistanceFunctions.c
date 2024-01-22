@@ -181,61 +181,131 @@ void writeMatrix2File(char *filename , int **matrix, int xL , int yL, char sep)
     }
     fclose(fp);
 }
+
+void writeMatrixDouble2File(char *filename , double **matrix, int xL , int yL, char sep)
+{
+    FILE *fp;
+    fp = fopen(filename, "w");
+    if (fp == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    // write matrix to file line by line with fprintf
+    size_t i, j;
+    for ( i = 0; i < xL; i++)
+    {
+        for ( j = 0; j < yL; j++)
+        {
+            fprintf(fp, "%f", matrix[i][j]);
+            if (j != yL - 1)
+                fprintf(fp, "%c", sep);
+        }
+        if (i != xL - 1)
+            fprintf(fp, "\n");
+    }
+    fclose(fp);
+}
 // ///////////////////////////////////////// PTHREADS /////////////////////////////////////////
+
+
+// int **RowsPerThreads(int max_threads, int ROWN)
+// {   
+
+//     // calculate the number of rows per thread
+//     int threadShare = ROWN / max_threads;
+//     // can we have a better thread share?
+//     int leftRows = ROWN - threadShare * max_threads;
+//     // if the leftrRows is less than 0, then the threadShare is too big
+//     if (leftRows < 0)
+//     {
+//         threadShare--;
+//         leftRows = ROWN - threadShare * max_threads;
+//     }
+    
+//     printf("max_threads: %d\n", max_threads);
+//     printf("ROWN: %d\n", ROWN);
+//     printf("threadShare: %d\n", threadShare * max_threads);
+//     printf("bestThreadShare: %d\n", threadShare);
+//     printf("leftRows: %d\n", leftRows);
+
+//     // create an array of rows for each thread
+//     int **threadRows = (int **) malloc(sizeof(int *) * max_threads);
+//     // for each thread
+//     size_t i;
+//     for (i = 0; i < max_threads; i++)
+//     {
+//         // create an array of rows
+//         threadRows[i] = (int *) malloc(sizeof(int) * threadShare + 1); // +1 for the sentinel
+//         // for each row
+//         size_t j;
+//         for (j = 0; j < threadShare; j++)
+//         {
+//             // add the row to the thread
+//             threadRows[i][j] = i * threadShare + j;
+//         }
+//         // add a sentinel
+//         threadRows[i][threadShare] = -1;
+//     }
+//     // add the left rows to the last thread
+//     if (leftRows > 0)
+//     {
+//         // reallocate the last thread
+//         int lastThreadNewSize = threadShare + leftRows + 1; // +1 for the sentinel
+//         threadRows[max_threads - 1] = (int *) realloc(threadRows[max_threads - 1], sizeof(int) * lastThreadNewSize);
+//         // add the left rows to the last thread
+//         size_t j;
+//         for (j = 0; j < leftRows; j++)
+//         {
+//             threadRows[max_threads - 1][j + threadShare] = max_threads * threadShare + j;
+//         }
+//         // add a sentinel
+//         threadRows[max_threads - 1][lastThreadNewSize - 1] = -1;
+//     }
+//     return threadRows;
+// }
 
 
 int **RowsPerThreads(int max_threads, int ROWN)
 {   
-
-    // calculate the number of rows per thread
-    int threadShare = ROWN / max_threads;
-    // can we have a better thread share?
-    int leftRows = ROWN - threadShare * max_threads;
-    // if the leftrRows is less than 0, then the threadShare is too big
-    if (leftRows < 0)
-    {
-        threadShare--;
-        leftRows = ROWN - threadShare * max_threads;
-    }
-    
-    printf("max_threads: %d\n", max_threads);
-    printf("ROWN: %d\n", ROWN);
-    printf("threadShare: %d\n", threadShare * max_threads);
-    printf("bestThreadShare: %d\n", threadShare);
-    printf("leftRows: %d\n", leftRows);
-
-    // create an array of rows for each thread
-    int **threadRows = (int **) malloc(sizeof(int *) * max_threads);
-    // for each thread
+    // create an array of rows numbers
+    int *rows = (int *) malloc(sizeof(int) * ROWN+1); // +1 for the sentinel
+    // for each row
     size_t i;
+    for (i = 0; i < ROWN; i++)
+    {
+        // add the row to the thread
+        rows[i] = i;
+    }
+    // add a sentinel
+    rows[ROWN] = -1;
+    
+    // distribute the rows to the threads
+    int **threadRows = (int **) malloc(sizeof(int *) * max_threads);
+    int threadShare = ROWN / max_threads + 10;
+    // create an array of rows for each thread
     for (i = 0; i < max_threads; i++)
     {
         // create an array of rows
-        threadRows[i] = (int *) malloc(sizeof(int) * threadShare + 1); // +1 for the sentinel
-        // for each row
-        size_t j;
-        for (j = 0; j < threadShare; j++)
-        {
-            // add the row to the thread
-            threadRows[i][j] = i * threadShare + j;
-        }
-        // add a sentinel
-        threadRows[i][threadShare] = -1;
+        threadRows[i] = (int *) malloc(sizeof(int) * threadShare);
     }
-    // add the left rows to the last thread
-    if (leftRows > 0)
+    // distribute the rows to the threads
+    int thread = 0;
+    int threadrow = 0;
+    int row = 0;
+    while(rows[0] != -1)
     {
-        // reallocate the last thread
-        int lastThreadNewSize = threadShare + leftRows + 1; // +1 for the sentinel
-        threadRows[max_threads - 1] = (int *) realloc(threadRows[max_threads - 1], sizeof(int) * lastThreadNewSize);
-        // add the left rows to the last thread
-        size_t j;
-        for (j = 0; j < leftRows; j++)
+        while (thread < max_threads && rows[0] != -1)
         {
-            threadRows[max_threads - 1][j + threadShare] = max_threads * threadShare + j;
+            // printf("thread: %d, row: %d\n", thread, rows[0]);
+            threadRows[thread][threadrow] = rows[0];
+            threadRows[thread][threadrow+1] = -1;
+            rows++;
+            row++;
+            thread++;
         }
-        // add a sentinel
-        threadRows[max_threads - 1][lastThreadNewSize - 1] = -1;
+        thread = 0;
+        threadrow++;
     }
     return threadRows;
 }
@@ -292,11 +362,11 @@ void* calculateAlleleFrequencies_Threads(void *args) {
     // print target rows
     while(targetRows[0] != -1)
     {
-        printf("%d ", targetRows[0]);
+        // printf("%d ", targetRows[0]);
         // calculate allele frequencies for the ith sample
         calculateAlleleFrequencies(matrix[targetRows[0]], MARKERS, markerFrequencies[targetRows[0]]);
         targetRows++;
     }
-    printf("Thread finished\n");
+    // printf("Thread finished\n");
 
 }

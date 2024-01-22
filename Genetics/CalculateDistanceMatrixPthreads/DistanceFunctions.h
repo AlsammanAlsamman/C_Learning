@@ -12,14 +12,16 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <string.h>
-#define MARKERS 50
-#define SAMPLES 50
-#define MAX_THREADS 5
+#define MARKERS 10000
+#define SAMPLES 1000
+#define MAX_THREADS 2
 
 
 // genettic functions
 int **createRandomMatrix(int, int);
 
+// read matrix from file
+void readMatrixFromFile(char *, int **);
 
 // double euclideanDistance(double* , double* , int );
 void calculateAlleleFrequencies(int* , int , double*);
@@ -48,4 +50,5 @@ typedef struct
 } thread_freq_args;
 
 void* calculateAlleleFrequencies_Threads( void *args);
-void writeMatrix2File(char *fileName, int **matrix, int xL, int yL, char sep);
+void writeMatrix2File(char *, int **, int, int, char);
+void writeMatrixDouble2File(char *, double **, int, int yL, char);
